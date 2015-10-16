@@ -1,4 +1,4 @@
 from .blindsearch import *
-from .astar import *
-from .greedy import *
-from .genetic import *
+from .astarsearch import *
+from .greedysearch import *
+from .geneticsearch import *
