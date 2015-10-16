@@ -1,3 +1,3 @@
-# graph-tool
+# TSP Solver 
 
-Utils developed for representing a graph
+Algorithms for solving Travel Salesman Problem instances from <a ref="http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/">TSPLIB</a>
