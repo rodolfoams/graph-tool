@@ -9,6 +9,7 @@ def main():
     g = Graph()
     g2 = loadTSPLIBDataset("brazil58")
     print "Criado um grafo com %d vertices e %d arestas" % (g2.numVertices, g2.numEdges)
+    blindSearch(g2)
     v1 = g.addVertex()
     v2 = g.addVertex()
     v3 = g.addVertex()
