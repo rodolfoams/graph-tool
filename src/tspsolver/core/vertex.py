@@ -3,9 +3,7 @@ class Vertex(object):
         self.index = index
 
     def __str__(self):
-        with StringIO() as sio:
-            sio.write("Vertex%d" % (self.index))
-            return sio.getvalue()
+        return str(self.index)
 
     def __eq__(self, other):
         if isinstance(other, Vertex):

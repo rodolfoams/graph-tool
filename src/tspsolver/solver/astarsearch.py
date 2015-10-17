@@ -1,6 +1,116 @@
-def h(edges, nChoices):
+class State(object):
+    def __init__(self, notVisited, totalDistance, estimate, current, edges):
+        self.notVisited = notVisited
+        self.totalDistance = totalDistance
+        self.estimate = estimate
+        self.current = current
+        self.edges = edges
 
-def astarsearch(graph):
-    vertices = graph.vertices
-    current = vertices[0] 
-    
+    def __lt__(self,other):
+        if self.estimate < other.estimate: return True
+        if self.estimate == other.estimate: return len(self.notVisited) < len(other.notVisited)
+        return False
+
+    def __eq__(self, other):
+        for v in self.notVisited:
+            if v not in other.notVisited: return False
+        for v in other.notVisited:
+            if v not in self.notVisited: return False
+        return self.current == other.current and self.estimate == other.estimate and self.totalDistance == other.totalDistance
+
+def find(vertex, forest):
+    for i in xrange(len(forest)):
+        if vertex in forest[i]: return i
+
+def closestCityDistance(edges, current, notVisited):
+    for e in edges:
+        if (e.source == current and e.target in notVisited) or (e.target == current and e.source in notVisited):
+            return e.weight
+ 
+def mst(edges, vertices):
+    forest = [[v] for v in vertices]
+    total = 0
+    for edge in edges:
+        if edge.target in vertices and edge.source in vertices:
+            idxSource = find(edge.source, forest)
+            idxTarget = find(edge.target, forest)
+            if idxSource != idxTarget:
+                forest[idxSource] = forest[idxSource] + forest[idxTarget]
+                forest.pop(idxTarget)
+                total += edge.weight
+        if len(forest) == 1:
+            return total
+
+def literalDistance(edges, current, root):
+    for e in edges:
+        if (e.source == current and e.target == root) or (e.source == root and e.target == current):
+            return e.weight
+
+def f(totalDistance, edges, current, root, notVisited):
+    if current == root: return totalDistance
+    return totalDistance + h(edges, current, root, notVisited)
+
+def h(edges, current, root, notVisited):
+    if len(notVisited) == 0:
+        return literalDistance(edges, current, root)
+    return closestCityDistance(edges, current, notVisited) + mst(edges, notVisited) + closestCityDistance(edges, root, notVisited)
+
+def isOptimalSolution(frontier, root):
+    return frontier[0].current == root
+
+def astarSearch(graph):
+    notVisited = list(graph.vertices)
+    edges = list(graph.edges)
+    edges.sort()
+    frontier = list()
+    current = notVisited[0] 
+    root = notVisited[0]
+    notVisited.remove(current)
+    for e in edges:
+        if current == e.source:
+            auxEdges = list(edges)
+            auxEdges.remove(e)
+            aux = list(notVisited)
+            aux.remove(e.target)
+            d = e.weight
+            frontier.append(State(aux, d, f(d,auxEdges,e.target,root,aux),e.target,auxEdges))
+        if current == e.target:
+            auxEdges = list(edges)
+            auxEdges.remove(e)
+            aux = list(notVisited)
+            aux.remove(e.source)
+            d = e.weight
+            frontier.append(State(aux, d, f(d,auxEdges,e.source,root,aux),e.source,auxEdges))
+
+    frontier.sort()
+    while not isOptimalSolution(frontier, root):
+        toExpand = frontier[0]
+        frontier = [toExpand]
+        if len(toExpand.notVisited) == 0:
+            for e in toExpand.edges:
+                if (e.source == root and e.target == toExpand.current) or (e.target == root and e.source == toExpand.current):
+                    auxEdges = list(edges)
+                    auxEdges.remove(e)
+                    frontier.append(State(toExpand.notVisited, toExpand.totalDistance + e.weight, toExpand.totalDistance + e.weight, root, auxEdges))
+                    frontier.remove(toExpand)
+                    break
+        else:
+            for e in toExpand.edges:
+                if e.source == toExpand.current and e.target in toExpand.notVisited:
+                    auxEdges = list(edges)
+                    auxEdges.remove(e)
+                    aux = list(toExpand.notVisited)
+                    aux.remove(e.target)
+                    d = toExpand.totalDistance + e.weight
+                    frontier.append(State(aux,d,f(d,auxEdges,e.target,root,aux),e.target,auxEdges))
+                if e.target == toExpand.current and e.source in toExpand.notVisited:
+                    auxEdges = list(edges)
+                    auxEdges.remove(e)
+                    aux = list(toExpand.notVisited)
+                    aux.remove(e.source)
+                    d = toExpand.totalDistance + e.weight
+                    frontier.append(State(aux,d,f(d,auxEdges,e.source,root,aux),e.source,auxEdges))
+            frontier.remove(toExpand)
+        frontier.sort()
+
+    return frontier[0].totalDistance

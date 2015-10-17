@@ -36,5 +36,5 @@ def greedySearch(graph):
                 edges.remove(e)
                 break
 
-    print "Total cost greedy:", totalCost
+    return totalCost
     

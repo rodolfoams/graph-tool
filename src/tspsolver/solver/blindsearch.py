@@ -21,4 +21,4 @@ def blindSearch(graph):
         if (current == e.source and root == e.target) or (current == e.target and root == e.source):
             totalCost += e.weight
 
-    print "Total cost blind:", totalCost
+    return totalCost
