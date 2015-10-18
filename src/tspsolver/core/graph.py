@@ -9,6 +9,7 @@ class Graph(object):
         self.edges = list()
         self.numVertices = 0
         self.numEdges = 0
+        self.neighbors = dict()
         if not isinstance(directed,bool): raise WrongParameterTypeException("bool", "%s" % (type(directed)))
         self.directed = directed
 
@@ -33,6 +34,12 @@ class Graph(object):
         while pos < len(self.edges) and newEdge.weight > self.edges[pos].weight:
             pos += 1
         self.edges.insert(pos,newEdge)
+        if source not in self.neighbors:
+            self.neighbors[source] = list()
+        if target not in self.neighbors:
+            self.neighbors[target] = list()
+        self.neighbors[source].append(newEdge)
+        self.neighbors[target].append(newEdge)
         self.numEdges += 1
         return newEdge
 

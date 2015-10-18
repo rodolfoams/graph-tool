@@ -8,7 +8,7 @@ class Edge(object):
     def getSource(self):
         return self.source
 
-    def getTarge(self):
+    def getTarget(self):
         return self.target
 
     def getWeight(self):
@@ -47,4 +47,5 @@ class Edge(object):
             return not self ==  other
         return False
 
-
+    def __contains__(self, key):
+        return self.target == key or self.source == key
