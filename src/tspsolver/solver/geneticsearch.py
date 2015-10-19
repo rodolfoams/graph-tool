@@ -87,7 +87,7 @@ def evolvePopulation(population, neighbors):
         newPopulation[i] = mutate(newPopulation[i])
     return newPopulation
 
-def geneticSearch(graph, iterations=100):
+def geneticSearch(graph, iterations=300):
     vertices = list(graph.vertices)
     population = list()
     neighbors = graph.neighbors

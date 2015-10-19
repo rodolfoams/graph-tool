@@ -6,14 +6,14 @@ from os import path
 sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
 from src import *
 
-algorithms = [blindSearch,greedySearch,astarSearch]
-strAlgorithms = ["blind","greedy","A*"]
+algorithms = [blindSearch,greedySearch,astarSearch,geneticSearch]
+strAlgorithms = ["blind","greedy","A*","genetic"]
 datasets = ["brazil58","eil101","gil262"]
 repetitions = 10
 
 def main():
     outfile = open("results.csv","w")
-    outfile.write('"algorithm","nodes","time","best"\n')
+    outfile.write('"algorithm","nodes","time","best","instance"\n')
     for i in xrange(repetitions):
         for d in datasets:
             g = loadTSPLIBDataset(d)
@@ -23,7 +23,7 @@ def main():
                 start = int(round(time.time()*1000))
                 best = a(g)
                 end = int(round(time.time()*1000))
-                outfile.write(",".join([strAlgorithms[j],str(n),str(end-start),str(best)])+"\n")
+                outfile.write(",".join([strAlgorithms[j],str(n),str(end-start),str(best),d])+"\n")
                 j += 1
     outfile.close()
 
