@@ -105,5 +105,4 @@ def geneticSearch(graph, iterations=100):
         if iterBestDistance < bestDistance:
             bestDistance = iterBestDistance
             bestPath = iterBestPath
-        print "Current best:", bestDistance
     return bestDistance 
