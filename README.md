@@ -6,3 +6,4 @@ References:
 ===========
 http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/  
 http://www.theprojectspot.com/tutorial-post/applying-a-genetic-algorithm-to-the-travelling-salesman-problem/5
+http://www.mnemstudio.org/ai/pso/pso_tsp_python_ex1.txt
