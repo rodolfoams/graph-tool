@@ -10,6 +10,9 @@ class Vertex(object):
             return self.index == other.index
         return False
 
+    def __repr__(self):
+        return str(self.index)
+
     def getIndex(self):
         return self.index
 

@@ -2,6 +2,7 @@ from io import StringIO
 from ..exception import *
 from vertex import *
 from edge import *
+from sys import maxint
 
 class Graph(object):
     def __init__(self,directed=False):
@@ -9,7 +10,8 @@ class Graph(object):
         self.edges = list()
         self.numVertices = 0
         self.numEdges = 0
-        self.neighbors = dict()
+        self.neighbors = None
+        self.sparseMatrix = None
         if not isinstance(directed,bool): raise WrongParameterTypeException("bool", "%s" % (type(directed)))
         self.directed = directed
 
@@ -17,29 +19,38 @@ class Graph(object):
         newVertex = Vertex(self.numVertices)
         self.vertices.append(newVertex)
         self.numVertices += 1
+        self.updateSparseMatrix()
         return newVertex
 
+    def initializeSparseMatrix(self):
+        self.sparseMatrix = list()
+        aux = [maxint] * self.numVertices
+        for i in xrange(self.numVertices):
+            self.sparseMatrix.append(list(aux))
+
+    def updateSparseMatrix(self):
+        if self.sparseMatrix == None:
+            self.initializeSparseMatrix()
+        if self.numVertices > len(self.sparseMatrix):
+            for l in self.sparseMatrix:
+                l.append(maxint)
+            self.sparseMatrix.append([maxint]*self.numVertices)
+
+    def populateNeighbors(self):
+        self.neighbors = dict()
+        for e in self.edges:
+            if e.source not in self.neighbors:
+                self.neighbors[e.source] = list()
+            if e.target not in self.neighbors:
+                self.neighbors[e.target] = list()
+            self.neighbors[e.source].append(e)
+            self.neighbors[e.target].append(e)
+
     def addEdge(self, source, target, weight=1):
-        v = Vertex(0)
-        if (not isinstance(source, type(v))) or (not isinstance(target, type(v))):
-            raise WrongParameterTypeException("%s, %s" % (type(v), type(v)), "%s, %s" % (type(source), type(target)))
-        if source not in self.vertices:
-            raise VertexNotFoundException(source)
-        if target not in self.vertices:
-            raise VertexNotFoundException(target)
         newEdge = Edge(source, target,weight,self.numEdges)
-        if newEdge in self.edges:
-            raise Exception("Edge already exists!")
-        pos = 0
-        while pos < len(self.edges) and newEdge.weight > self.edges[pos].weight:
-            pos += 1
-        self.edges.insert(pos,newEdge)
-        if source not in self.neighbors:
-            self.neighbors[source] = list()
-        if target not in self.neighbors:
-            self.neighbors[target] = list()
-        self.neighbors[source].append(newEdge)
-        self.neighbors[target].append(newEdge)
+        self.edges.append(newEdge)
+        self.sparseMatrix[source.index][target.index] = min(weight,self.sparseMatrix[source.index][target.index])
+        self.sparseMatrix[target.index][source.index] = min(weight,self.sparseMatrix[target.index][source.index])
         self.numEdges += 1
         return newEdge
 

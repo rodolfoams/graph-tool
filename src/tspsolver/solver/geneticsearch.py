@@ -1,49 +1,46 @@
-from random import shuffle, randint, random
+from random import shuffle, randint, random, choice
 from ..core import Edge
 from sys import maxint
 from math import sqrt, ceil
 
-mutationRate = 0.015
-populationSize = 50
-tournamentSize = 5
+mutationRate = 0.001
+populationSize = 200
+tournamentSize = 7
+crossoverProbability = 0.85
 eliteSize = 5
 
-def strPath(path):
-    vertices = map(str,[v.index for v in path])
-    vertices.append(vertices[0])
-    return "-".join(vertices)
+def totalCost(population):
+    total = 0
+    for p in population:
+        total += p[1]
+    return total
 
-def d(edge, edges):
-    for e in edges:
-        if e == edge:
-            return e.weight
-
-def cost(path, neighbors):
+def cost(path, sparseMatrix):
     distance = 0
     for i in xrange(len(path)):
         source = path[i]
         target = path[(i+1)%len(path)]
-        edge = Edge(source, target,0,0)
-        distance += d(edge, neighbors[source])
+        distance += sparseMatrix[source.index][target.index]
     return distance
 
-def getFittest(population, neighbors):
+def getFittest(population):
     bestPath = None
     bestDistance = maxint
     
     for individual in population:
-        c = cost(individual,neighbors)
+        c = individual[1]
         if c < bestDistance:
-            bestPath = individual
+            bestPath = individual[0]
             bestDistance = c
     return bestPath, bestDistance
 
-def tournamentSelection(population, neighbors):
+def tournamentSelection(population):
     tournament = list()
+    tCost = totalCost(population)
+    weighedPopulation = [k for k in population for i in xrange(int(ceil(float(tCost)/k[1])))]
     for i in xrange(tournamentSize):
-        randomId = randint(0,populationSize-1)
-        tournament.append(population[randomId])
-    return getFittest(tournament,neighbors)[0]
+        tournament.append(choice(weighedPopulation))
+    return getFittest(tournament)[0]
 
 def crossover(p1, p2):
     child = [None] * len(p1)
@@ -76,33 +73,39 @@ def mutate(path):
             individual[i] = aux
     return individual
 
-def evolvePopulation(population, neighbors):
-    newPopulation = population[:eliteSize]
+def evolvePopulation(population, sparseMatrix):
+    population = sorted(population,key=lambda x: x[1])
+    elite = population[:eliteSize]
+    newPopulation = list()
     for i in xrange(eliteSize,populationSize):
-        parent1 = tournamentSelection(population, neighbors)
-        parent2 = tournamentSelection(population,neighbors)
-        child = crossover(parent1,parent2)
+        child = None
+        if random() <= crossoverProbability:
+            parent1 = tournamentSelection(population)
+            parent2 = tournamentSelection(population)
+            child = crossover(parent1,parent2)
+        else:
+            child = population[i][0]
         newPopulation.append(child)
-    for i in xrange(eliteSize,populationSize):
+    for i in xrange(populationSize-eliteSize):
         newPopulation[i] = mutate(newPopulation[i])
-    return newPopulation
+    return elite + [(x, cost(x,sparseMatrix)) for x in newPopulation]
 
-def geneticSearch(graph, iterations=300):
+def geneticSearch(graph, iterations=100):
     vertices = list(graph.vertices)
     population = list()
-    neighbors = graph.neighbors
+    sparseMatrix = graph.sparseMatrix
     bestPath = None
     bestDistance = maxint
     for i in xrange(populationSize):
         shuffle(vertices)
         aux = list(vertices)
-        population.append(aux)
-    bestPath, bestDistance = getFittest(population, neighbors)
+        population.append((aux,cost(aux,sparseMatrix)))
+    bestPath, bestDistance = getFittest(population) 
     for i in xrange(iterations):
-        population = sorted(population,key=lambda x: cost(x,neighbors))
-        population = evolvePopulation(population, neighbors)
-        iterBestPath, iterBestDistance = getFittest(population, neighbors)
+        population = evolvePopulation(population,sparseMatrix)
+        iterBestPath, iterBestDistance = getFittest(population) 
         if iterBestDistance < bestDistance:
             bestDistance = iterBestDistance
             bestPath = iterBestPath
+        print bestDistance
     return bestDistance 

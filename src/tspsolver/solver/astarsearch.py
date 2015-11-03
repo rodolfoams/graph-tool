@@ -1,5 +1,6 @@
 from sys import maxint
 from ..core import Edge
+from random import shuffle
 
 def find(vertex, forest):
     for i in xrange(len(forest)):
@@ -29,6 +30,10 @@ def literalDistance(edges, current, root):
         if (e.source == current and e.target == root) or (e.source == root and e.target == current):
             return e.weight
 
+def f2(totalDistance, sparseMatrix, current, root, notVisited, nVertices):
+    if current == root: return totalDistance
+    return totalDistance + h2(sparseMatrix, current, root, notVisited, nVertices)
+
 def f(totalDistance, edges, current, root, notVisited):
     if current == root: return totalDistance
     return totalDistance + h(edges, current, root, notVisited)
@@ -38,22 +43,45 @@ def h(edges, current, root, notVisited):
         return literalDistance(edges, current, root)
     return closestCityDistance(edges, current, notVisited) + mst(edges, notVisited) + closestCityDistance(edges, root, notVisited)
 
+def closestDistanceToRoot(sparseMatrix, root, notVisited):
+    minDistance = maxint
+    for v in notVisited:
+        if sparseMatrix[v.index][root.index] < minDistance:
+            minDistance = sparseMatrix[v.index][root.index]
+    return minDistance
+
+def furthestDistanceToRoot(sparseMatrix, root, notVisited):
+    maxDistance = 0
+    for v in notVisited:
+        if sparseMatrix[v.index][root.index] > maxDistance:
+            maxDistance = sparseMatrix[v.index][root.index]
+    return maxDistance
+
+def h2(sparseMatrix, current, root, notVisited, nVertices):
+    if len(notVisited) < nVertices/2:
+        return closestDistanceToRoot(sparseMatrix,root, notVisited)
+    return furthestDistanceToRoot(sparseMatrix,root, notVisited)
+
+def edgeBetween(v1, v2, edges):
+    e = Edge(v1,v2)
+    return edges[edges.index(e)]
+        
 def astarSearch(graph):
     notVisited = list(graph.vertices)
+    nVertices = len(notVisited)
+    shuffle(notVisited)
     edges = list(graph.edges)
-    edges.sort()
     current = notVisited[0] 
     root = notVisited[0]
     notVisited.remove(current)
     neighbors = dict(graph.neighbors)
+    sparseMatrix = list(graph.sparseMatrix)
     distance = 0
-    notVisited.sort()
     while current != root or len(notVisited) > 0:
         if len(notVisited) == 0:
-            for e in neighbors[current]:
-                if e == Edge(current,root,0,0):
-                    distance += e.weight
-                    current = root
+            e = edgeBetween(current, root)
+            distance += e.weight
+            current = root
             continue
         minEstimate = maxint
         nextEdge = None
@@ -72,7 +100,9 @@ def astarSearch(graph):
             aux = list(notVisited)
             aux.remove(nextNode)
             d = distance + e.weight
-            estimate = f(d,edges,nextNode,root,aux)
+#            estimate = f(d,edges,nextNode,root,aux)
+            estimate = f2(d,sparseMatrix,nextNode,root,aux, nVertices)
+
             if estimate < minEstimate:
                 minEstimate = estimate
                 nextEdge = e

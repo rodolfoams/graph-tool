@@ -1,7 +1,6 @@
 import sys
 from .. import *
 from os.path import join, dirname 
-from random import shuffle
 
 def loadTSPLIBDataset(dataset):
     path = join(dirname(__file__),dataset) + ".tsp"
@@ -20,7 +19,6 @@ def loadTSPLIBDataset(dataset):
         for j in xrange(i+1,numVertices):
             g.addEdge(g.vertices[i],g.vertices[j],edgeSet[pEdge])
             pEdge += 1
-    shuffle(g.vertices)
-    shuffle(g.edges)
+    g.populateNeighbors()
     return g
         
