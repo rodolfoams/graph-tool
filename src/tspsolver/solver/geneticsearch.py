@@ -7,13 +7,12 @@ mutationRate = 0.001
 populationSize = 200
 tournamentSize = 7
 crossoverProbability = 0.85
-eliteSize = 5
+eliteSize = 3
 
 def totalCost(population):
-    total = 0
-    for p in population:
-        total += p[1]
-    return total
+#    return reduce(lambda x, y: x + y[1] if isinstance(x, int) else x[1] + y[1],population)
+     return reduce(lambda x, y: x + y, map(lambda x: x[1],population))
+#    return sum([x[1] for x in population])
 
 def cost(path, sparseMatrix):
     distance = 0
@@ -107,5 +106,4 @@ def geneticSearch(graph, iterations=100):
         if iterBestDistance < bestDistance:
             bestDistance = iterBestDistance
             bestPath = iterBestPath
-        print bestDistance
     return bestDistance 
